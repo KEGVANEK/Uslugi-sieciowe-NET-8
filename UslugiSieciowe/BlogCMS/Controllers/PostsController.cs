@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BlogCMS.Models; 
+using Microsoft.AspNetCore.Authorization;
+using BlogCMS.Models;
 using BlogCMS.Interfaces;
 using BlogCMS.Repository;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class PostsController : ControllerBase
 {
     private readonly IRepository<Post> _postRepository;
-
     private readonly gRPCRepository _gRPCRepository;
 
     public PostsController(IRepository<Post> postRepository, gRPCRepository gRPCRepository)
@@ -19,6 +20,7 @@ public class PostsController : ControllerBase
 
     // GET: api/posts
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAllPosts()
     {
         var posts = await _postRepository.GetAllAsync();
@@ -27,9 +29,9 @@ public class PostsController : ControllerBase
 
     // GET: api/posts/{id}
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetPostById(int id)
     {
-        //var post = await _postRepository.GetByIdAsync(id);
         var post = await _gRPCRepository.GetByIdAsync(id);
         if (post == null)
         {
@@ -42,8 +44,7 @@ public class PostsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePost(Post post)
     {
-
-        //await _gRPCRepository.AddAsync(post);
+        await _postRepository.AddAsync(post);
         return Created();
     }
 
